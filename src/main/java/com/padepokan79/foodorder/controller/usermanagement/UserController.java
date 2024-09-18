@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.padepokan79.foodorder.dto.request.LoginRequest;
 import com.padepokan79.foodorder.dto.request.RegisterRequest;
-import com.padepokan79.foodorder.dto.response.MessageReponseWithData;
+import com.padepokan79.foodorder.dto.response.MessageResponse;
 import com.padepokan79.foodorder.service.usermanagement.UserService;
 
 @RestController
@@ -24,13 +24,13 @@ public class UserController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<MessageReponseWithData> login(@RequestBody LoginRequest request) {       
+    public ResponseEntity<MessageResponse> login(@RequestBody LoginRequest request) {       
         return userService.userLogin(request);
         // throw new Exception("Error");
     }
     
     @PostMapping("/sign-up")
-    public ResponseEntity<? extends Object> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<MessageResponse> register(@RequestBody RegisterRequest request) {
         return userService.registerUser(request);
     }
 

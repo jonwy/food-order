@@ -17,7 +17,7 @@ import com.padepokan79.foodorder.dto.request.CartCheckoutRequest;
 import com.padepokan79.foodorder.dto.request.CartRequest;
 import com.padepokan79.foodorder.dto.request.FoodRequestDto;
 import com.padepokan79.foodorder.dto.request.PageRequestDto;
-import com.padepokan79.foodorder.dto.response.ApiResponseWithData;
+import com.padepokan79.foodorder.dto.response.MessageResponse;
 import com.padepokan79.foodorder.service.foodorder.FoodOrderService;
 
 
@@ -39,7 +39,7 @@ public class FoodOrderController {
     
     
     @GetMapping("/foods")
-    public ApiResponseWithData getAllFoods(@ModelAttribute PageRequestDto pageRequest, @ModelAttribute FoodRequestDto foodRequest) {
+    public ResponseEntity<MessageResponse> getAllFoods(@ModelAttribute PageRequestDto pageRequest, @ModelAttribute FoodRequestDto foodRequest) {
         if (!foodRequest.getFoodName().equals("%%")) {
             foodRequest.setFoodName("%" + foodRequest.getFoodName() + "%");
         }
@@ -47,43 +47,43 @@ public class FoodOrderController {
     }
 
     @GetMapping("/foods/{food-id}")
-    public ApiResponseWithData getFoodDetail(@PathVariable(name = "food-id") Integer foodId) {
+    public ResponseEntity<MessageResponse> getFoodDetail(@PathVariable(name = "food-id") Integer foodId) {
         return foodOrderService.getFoodDetail(foodId);
     }
 
     @PutMapping("/foods/{foodId}/favorites")
-    public ApiResponseWithData toogleFavorite(@PathVariable(name = "foodId") Integer foodId) {
+    public ResponseEntity<MessageResponse> toogleFavorite(@PathVariable(name = "foodId") Integer foodId) {
         return foodOrderService.toggleFavorites(foodId);
     }
 
     @GetMapping("/foods/my-favorite-foods")
-    public ApiResponseWithData getAllFavorite() {
+    public ResponseEntity<MessageResponse> getAllFavorite() {
         return foodOrderService.getAllFavorite();
     }
 
     @GetMapping("/cart")
-    public ApiResponseWithData getAllCarts() {
+    public ResponseEntity<MessageResponse> getAllCarts() {
         return foodOrderService.getAllCarts();
     }
     
 
     @PostMapping("/cart/")
-    public ApiResponseWithData addToCart(@RequestParam Integer foodId) {
+    public ResponseEntity<MessageResponse> addToCart(@RequestParam Integer foodId) {
         return foodOrderService.addToCart(foodId);
     }
 
     @PutMapping("/cart/{cart_id}")
-    public ApiResponseWithData setFoodQuantityInCart(@PathVariable("cart_id") Integer cartId, @RequestBody CartRequest cartRequest) {
+    public ResponseEntity<MessageResponse> setFoodQuantityInCart(@PathVariable("cart_id") Integer cartId, @RequestBody CartRequest cartRequest) {
         return foodOrderService.setFoodQuantityInCart(cartId, cartRequest);
     }
 
     @DeleteMapping("/cart/{cartId}/")
-    public ApiResponseWithData deleteFoodFromCart(@PathVariable("cartId")Integer cartId) {
+    public ResponseEntity<MessageResponse> deleteFoodFromCart(@PathVariable("cartId")Integer cartId) {
         return foodOrderService.deleteFoodFromCart(cartId);
     }
 
     @PostMapping("/cart/checkout")
-    public ApiResponseWithData checkoutCart(@RequestBody CartCheckoutRequest request) {
+    public ResponseEntity<MessageResponse> checkoutCart(@RequestBody CartCheckoutRequest request) {
         return foodOrderService.checkout(request);//S
         // throw new com.padepokan79.foodorder.exception.classes.Exception("Error");
     }
@@ -94,19 +94,19 @@ public class FoodOrderController {
     }
     
     @GetMapping("/order-history")
-    public ApiResponseWithData getOrderHistory() {
+    public ResponseEntity<MessageResponse> getOrderHistory() {
         return foodOrderService.orderHistory();
     }
 
+
+    // Testing related endpoints
     @GetMapping("/test")
     public String test(@RequestHeader String authorization) {
         return authorization;
     }
 
     @GetMapping("/test-new")
-    public ResponseEntity<ApiResponseWithData> getMethodName(@RequestParam Integer userId) {
+    public ResponseEntity<MessageResponse> getMethodName(@RequestParam Integer userId) {
         return foodOrderService.foodAlsoWithCart(userId);
     }
-    
-    
 }
