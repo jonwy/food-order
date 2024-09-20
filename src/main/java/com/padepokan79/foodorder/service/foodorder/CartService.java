@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.padepokan79.foodorder.dto.CartDto;
 import com.padepokan79.foodorder.dto.request.CartCheckoutRequest;
 import com.padepokan79.foodorder.dto.request.CartRequest;
-import com.padepokan79.foodorder.dto.response.ApiResponseWithData;
+import com.padepokan79.foodorder.dto.response.MessageResponse;
 import com.padepokan79.foodorder.exception.classes.CartException;
 import com.padepokan79.foodorder.exception.classes.DataNotFoundException;
 import com.padepokan79.foodorder.model.Cart;
@@ -28,11 +28,14 @@ import com.padepokan79.foodorder.repository.OrderDetailRepository;
 import com.padepokan79.foodorder.repository.OrderRepository;
 import com.padepokan79.foodorder.repository.UserRepository;
 import com.padepokan79.foodorder.security.service.UserDetailsImplement;
+import com.padepokan79.foodorder.utils.ResponseUtil;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CartService {
     
     private final CartRepository cartRepository;
@@ -40,32 +43,15 @@ public class CartService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final OrderDetailRepository orderDetailRepository;
-    private final OrderRepository orderRepository;;
+    private final OrderRepository orderRepository;
 
-    public CartService(
-            final CartRepository cartRepository, final FoodRepository foodRepository, 
-            final UserRepository userRepository, final ModelMapper modelMapper,
-            final OrderDetailRepository orderDetailRepository, final OrderRepository orderRepository) {
-        this.cartRepository = cartRepository;
-        this.foodRepository = foodRepository;
-        this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
-        this.orderDetailRepository = orderDetailRepository;
-        this.orderRepository = orderRepository;
-    }
-
-    public ApiResponseWithData getAllCarts() {
+    public ResponseEntity<MessageResponse> getAllCarts() {
         HttpStatus status = HttpStatus.OK;
         Integer userId = ((UserDetailsImplement) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         User user = userRepository.findById(userId).get();
         List<Cart> carts = cartRepository.findNotDeletedCartByUserId(user);
         List<CartDto> cartDtos = carts.stream().map(item -> modelMapper.map(item, CartDto.class)).toList();
-        return ApiResponseWithData.builder()
-            .data(cartDtos)
-            .total(cartDtos.size())
-            .status(status.toString())
-            .statusCode(status.value())
-            .build();
+        return ResponseUtil.createResponse(status, "Data keranjang berhasil dimuat.", cartDtos);
     }
 
     public ResponseEntity<Long> getCartTotal() {
@@ -75,7 +61,7 @@ public class CartService {
     }
 
     @Transactional
-    public ApiResponseWithData addToCart(Integer foodId) {
+    public ResponseEntity<MessageResponse> addToCart(Integer foodId) {
         HttpStatus status = HttpStatus.OK;
         String message = "";
         if (!foodRepository.existsById(foodId)) {
@@ -110,18 +96,11 @@ public class CartService {
                 message = String.format("Makanan %s berhasil ditambahkan ke dalam keranjang", cart.getFood().getFoodName());
             }
         }
-        
-        return ApiResponseWithData.builder()
-                .data("")
-                .total(0)
-                .message(message)
-                .status(status.toString())
-                .statusCode(status.value())
-                .build();
+        return ResponseUtil.createResponse(status, message);
     }
 
     @Transactional
-    public ApiResponseWithData setFoodQuantity(Integer cartId, CartRequest request) {
+    public ResponseEntity<MessageResponse> setFoodQuantity(Integer cartId, CartRequest request) {
         HttpStatus status = HttpStatus.OK;
         String message = "";
         Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new DataNotFoundException("Makanan tidak ditemukan di keranjang"));
@@ -141,33 +120,21 @@ public class CartService {
         }
         
         cartRepository.save(cart);
-        return ApiResponseWithData.builder()
-                .data("")
-                .total(0)
-                .message(message)
-                .status(status.toString())
-                .statusCode(status.value())
-                .build();
+        return ResponseUtil.createResponse(status, message);
     }
 
     @Transactional
-    public ApiResponseWithData deleteItem(Integer cartId) {
+    public ResponseEntity<MessageResponse> deleteItem(Integer cartId) {
         HttpStatus status = HttpStatus.OK;
         // Integer userId = ((UserDetailsImplement) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new DataNotFoundException("Makanan tidak ditemukan di keranjang"));
         cart.setDeleted(true);
         cartRepository.save(cart);
-        return ApiResponseWithData.builder()
-                .data("")
-                .total(0)
-                .message("Berhasil menghapus item")
-                .status(status.toString())
-                .statusCode(status.value())
-                .build();
+        return ResponseUtil.createResponse(status, "Berhasil menghapus item dari keranjang");
     }
 
     @Transactional
-    public ApiResponseWithData checkout(CartCheckoutRequest request) {
+    public ResponseEntity<MessageResponse> checkout(CartCheckoutRequest request) {
         if (request.getCartIds() == null || request.getCartIds().isEmpty()) {
             throw new CartException("Keranjang tidak boleh kosong");
         }
@@ -204,13 +171,7 @@ public class CartService {
         orderRepository.save(order);
         orderDetailRepository.saveAll(orderDetails);
         cartRepository.saveAll(carts);
-        return ApiResponseWithData.builder()
-                    .data("")
-                    .total(0)
-                    .message("Cart berhasil di checkout")
-                    .status(HttpStatus.CREATED.toString())
-                    .statusCode(HttpStatus.CREATED.value())
-                    .build();
+        return ResponseUtil.createResponse(HttpStatus.OK, "Keranjang berhasil dicheckout.");
     }
 
 

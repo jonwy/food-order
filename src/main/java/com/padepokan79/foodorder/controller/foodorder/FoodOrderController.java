@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,9 +39,6 @@ public class FoodOrderController {
     
     @GetMapping("/foods")
     public ResponseEntity<MessageResponse> getAllFoods(@ModelAttribute PageRequestDto pageRequest, @ModelAttribute FoodRequestDto foodRequest) {
-        if (!foodRequest.getFoodName().equals("%%")) {
-            foodRequest.setFoodName("%" + foodRequest.getFoodName() + "%");
-        }
         return foodOrderService.getAllFoods(pageRequest, foodRequest);
     }
 
@@ -67,7 +63,7 @@ public class FoodOrderController {
     }
     
 
-    @PostMapping("/cart/")
+    @PostMapping("/cart")
     public ResponseEntity<MessageResponse> addToCart(@RequestParam Integer foodId) {
         return foodOrderService.addToCart(foodId);
     }
@@ -77,7 +73,7 @@ public class FoodOrderController {
         return foodOrderService.setFoodQuantityInCart(cartId, cartRequest);
     }
 
-    @DeleteMapping("/cart/{cartId}/")
+    @DeleteMapping("/cart/{cartId}")
     public ResponseEntity<MessageResponse> deleteFoodFromCart(@PathVariable("cartId")Integer cartId) {
         return foodOrderService.deleteFoodFromCart(cartId);
     }
@@ -96,17 +92,5 @@ public class FoodOrderController {
     @GetMapping("/order-history")
     public ResponseEntity<MessageResponse> getOrderHistory() {
         return foodOrderService.orderHistory();
-    }
-
-
-    // Testing related endpoints
-    @GetMapping("/test")
-    public String test(@RequestHeader String authorization) {
-        return authorization;
-    }
-
-    @GetMapping("/test-new")
-    public ResponseEntity<MessageResponse> getMethodName(@RequestParam Integer userId) {
-        return foodOrderService.foodAlsoWithCart(userId);
     }
 }
