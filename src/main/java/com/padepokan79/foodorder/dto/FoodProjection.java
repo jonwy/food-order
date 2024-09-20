@@ -1,8 +1,8 @@
-package com.padepokan79.foodorder.service.projection;
+package com.padepokan79.foodorder.dto;
 
 import com.padepokan79.foodorder.model.Category;
 
-public interface FoodWithFavorite {
+public interface FoodProjection {
     public Integer getFoodId();
     public String getFoodName();
     public Category getCategory();

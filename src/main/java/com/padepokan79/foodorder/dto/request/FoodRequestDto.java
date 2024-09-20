@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FoodRequestDto {
     
-    private String foodName = "%%";
+    private String foodName = "";
     private Integer categoryId;
     private Integer price;
 }
